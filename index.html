@@ -10,28 +10,25 @@
 <style>
 /* Layout: 1カラム。上に入力フォーム、下にカードのプレビューと保存ボタン */
 :root{
-  --bg:#f3f6f5; --surface:#ffffff; --ink:#1f2e2c; --muted:#5d6e6b;
-  --line:#d5e0dd; --accent:#1f7a6d; --accent-soft:#e2f1ee; --warm:#e8a33d;
+  --bg:#eef9fa; --surface:#ffffff; --ink:#173a40; --muted:#5b7a80;
+  --line:#cfe9ec; --accent:#13a6b8; --accent-deep:#0b8597; --accent-soft:#e0f5f7;
   --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
   --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#141c1b; --surface:#1c2725; --ink:#e7efed; --muted:#9db0ac;
-  --line:#2f3f3c; --accent:#5cc2b2; --accent-soft:#1f3532; --warm:#f0b75a; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#141c1b; --surface:#1c2725; --ink:#e7efed; --muted:#9db0ac;
-  --line:#2f3f3c; --accent:#5cc2b2; --accent-soft:#1f3532; --warm:#f0b75a; color-scheme:dark}
-html{color-scheme:light}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7}
 .wrap{max-width:640px;margin:0 auto;padding-block:28px 48px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   display:flex;flex-direction:column;gap:22px}
-h1{font-family:var(--display);font-size:1.6rem;margin:0;text-wrap:balance;line-height:1.35}
+h1{font-family:var(--display);font-size:1.6rem;margin:0;line-height:1.35;color:var(--accent-deep)}
 .lead{margin:6px 0 0;color:var(--muted)}
 form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px}
 .field{display:flex;flex-direction:column;gap:6px}
+.labelrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 label{font-weight:700;font-size:.95rem}
 label .no{display:inline-block;min-width:1.6em;color:var(--accent);font-family:var(--display)}
+.count{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.count.full{color:var(--accent-deep);font-weight:700}
 .hint{font-size:.82rem;color:var(--muted)}
 input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
 textarea{resize:vertical;min-height:3.2em}
@@ -41,15 +38,14 @@ input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;bo
 #cardImg{width:100%;border-radius:12px;border:1px solid var(--line);display:block;background:#fff}
 .actions{display:flex;flex-wrap:wrap;gap:10px}
 button{font:inherit;font-weight:700;border-radius:999px;padding:11px 20px;cursor:pointer;border:1px solid var(--accent)}
-.primary{background:var(--accent);color:var(--surface)}
-.ghost{background:transparent;color:var(--accent)}
-button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+.primary{background:var(--accent);color:#fff}
+.ghost{background:var(--surface);color:var(--accent-deep)}
+button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
 #status{font-size:.88rem;color:var(--muted);min-height:1.4em;margin:0}
 .note{font-size:.82rem;color:var(--muted);margin:0}
 </style>
 </head>
 <body>
-
 
 <div class="wrap">
   <header>
@@ -59,20 +55,20 @@ button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
 
   <form id="f" autocomplete="off">
     <div class="field">
-      <label for="name"><span class="no">・</span>お名前（ニックネーム）</label>
-      <input id="name" maxlength="30" placeholder="例：なのか">
+      <div class="labelrow"><label for="name"><span class="no">・</span>お名前（ニックネーム）</label><span class="count" data-for="name"></span></div>
+      <input id="name" maxlength="15" placeholder="例：なのか">
     </div>
     <div class="field">
-      <label for="from"><span class="no">①</span>どこから来ましたか？</label>
-      <input id="from" maxlength="40" placeholder="例：千葉市">
+      <div class="labelrow"><label for="from"><span class="no">①</span>どこから来ましたか？</label><span class="count" data-for="from"></span></div>
+      <input id="from" maxlength="20" placeholder="例：千葉市">
     </div>
     <div class="field">
-      <label for="now"><span class="no">②</span>今の業界 or 職種</label>
-      <input id="now" maxlength="60" placeholder="例：不動産業界／営業職 など">
+      <div class="labelrow"><label for="now"><span class="no">②</span>今の業界 or 職種</label><span class="count" data-for="now"></span></div>
+      <input id="now" maxlength="30" placeholder="例：不動産業界／営業職 など">
     </div>
     <div class="field">
-      <label for="next"><span class="no">③</span>これから挑戦してみたいこと</label>
-      <textarea id="next" maxlength="90" rows="2" placeholder="例：IT業界、手に職をつけたい など"></textarea>
+      <div class="labelrow"><label for="next"><span class="no">③</span>これから挑戦してみたいこと</label><span class="count" data-for="next"></span></div>
+      <textarea id="next" maxlength="60" rows="3" placeholder="例：IT業界、手に職をつけたい など"></textarea>
       <span class="hint">ざっくりでOK！「まだ考え中」も大歓迎です</span>
     </div>
   </form>
@@ -82,11 +78,11 @@ button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
     <img id="cardImg" alt="自己紹介カードのプレビュー">
     <div class="actions">
       <button type="button" class="primary" id="savePdf" hidden>PDFで保存</button>
-      <button type="button" class="ghost" id="savePng" hidden>画像で保存</button>
+      <button type="button" class="ghost" id="savePng">画像で保存</button>
       <button type="button" class="ghost" id="copyTxt">テキストをコピー</button>
     </div>
     <p id="status" role="status"></p>
-    <p class="note" id="fallback">保存ボタンが出ない場合は、カード画像を長押し（PCは右クリック）で保存できます。</p>
+    <p class="note">うまく保存できない場合は、カード画像を長押し（PCは右クリック）で保存できます。</p>
   </section>
 </div>
 
@@ -94,68 +90,91 @@ button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
 (function(){
   const $ = id => document.getElementById(id);
   const ids = ["name","from","now","next"];
-  const W = 1200, H = 760;
+  const W = 1200, H = 900;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
   const FONT = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Meiryo",sans-serif';
   const DISP = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif';
+  const C = { bg:"#eef9fa", teal:"#13a6b8", deep:"#0b8597", soft:"#e0f5f7", ink:"#173a40", muted:"#5b7a80", empty:"#b6cfd3" };
 
-  // 入力途中の内容だけ、この端末に残す
-  try{ const d = JSON.parse(localStorage.getItem("jiko-draft")||"{}"); ids.forEach(k=>{ if(d[k]) $(k).value=d[k]; }); }catch(e){}
+  try{ const d = JSON.parse(localStorage.getItem("jiko-draft")||"{}"); ids.forEach(k=>{ if(d[k]) $(k).value=d[k].slice(0,$(k).maxLength); }); }catch(e){}
 
-  const val = k => $(k).value.trim();
+  const val = k => $(k).value.replace(/\n+/g," ").trim();
 
   function wrap(text, maxW){
     const lines=[]; let cur="";
     for(const ch of text){
-      if(ch==="\n"){ lines.push(cur); cur=""; continue; }
       if(ctx.measureText(cur+ch).width>maxW){ lines.push(cur); cur=ch; } else cur+=ch;
     }
     if(cur) lines.push(cur);
     return lines;
   }
+  // 決められた行数に収まるまで文字を小さくする
+  function fit(text, maxW, maxLines, size, minSize, weight, family){
+    let s=size, lines;
+    while(true){
+      ctx.font=`${weight} ${s}px ${family}`;
+      lines=wrap(text,maxW);
+      if(lines.length<=maxLines || s<=minSize) break;
+      s-=2;
+    }
+    return {lines:lines.slice(0,maxLines), size:s};
+  }
   function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 
   function draw(){
-    const teal="#1f7a6d", ink="#1f2e2c", muted="#5d6e6b", soft="#e2f1ee", warm="#e8a33d";
-    ctx.fillStyle="#f3f6f5"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
     ctx.fillStyle="#ffffff"; roundRect(30,30,W-60,H-60,28); ctx.fill();
-    // 上の帯
     ctx.save(); roundRect(30,30,W-60,H-60,28); ctx.clip();
-    ctx.fillStyle=teal; ctx.fillRect(30,30,W-60,96); ctx.restore();
+    const g=ctx.createLinearGradient(30,0,W-30,0); g.addColorStop(0,C.teal); g.addColorStop(1,"#3cc6d3");
+    ctx.fillStyle=g; ctx.fillRect(30,30,W-60,96); ctx.restore();
     ctx.fillStyle="#ffffff"; ctx.font=`700 34px ${DISP}`; ctx.textBaseline="middle";
     ctx.fillText("自己紹介カード",72,78);
-    ctx.fillStyle=warm; ctx.beginPath(); ctx.arc(W-90,78,14,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=.35; ctx.beginPath(); ctx.arc(W-110,78,14,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=.7; ctx.beginPath(); ctx.arc(W-80,78,14,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+
+    ctx.textBaseline="alphabetic";
+    const textW=W-120-72;
 
     // 名前
-    ctx.textBaseline="alphabetic";
-    ctx.fillStyle=muted; ctx.font=`500 24px ${FONT}`; ctx.fillText("お名前",72,186);
-    const nm = val("name")||"（お名前）";
-    ctx.fillStyle=val("name")?ink:"#b3c0bd"; ctx.font=`700 60px ${DISP}`;
-    let n=nm; while(ctx.measureText(n).width>W-150 && n.length>1) n=n.slice(0,-1);
-    ctx.fillText(n,72,256);
-    ctx.fillStyle=soft; ctx.fillRect(72,282,W-144,4);
+    ctx.fillStyle=C.muted; ctx.font=`500 24px ${FONT}`; ctx.fillText("お名前",72,186);
+    const nm=val("name");
+    const nf=fit(nm||"（お名前）", W-144, 1, 60, 36, 700, DISP);
+    ctx.fillStyle=nm?C.ink:C.empty; ctx.font=`700 ${nf.size}px ${DISP}`; ctx.fillText(nf.lines[0]||"",72,256);
+    ctx.fillStyle=C.soft; ctx.fillRect(72,284,W-144,4);
 
-    const rows=[["①","どこから来ましたか？","from"],["②","今の業界 or 職種","now"],["③","これから挑戦してみたいこと","next"]];
-    let y=330;
-    rows.forEach(([no,lab,k])=>{
-      ctx.fillStyle=teal; ctx.font=`700 30px ${DISP}`; ctx.fillText(no,72,y+30);
-      ctx.fillStyle=muted; ctx.font=`500 24px ${FONT}`; ctx.fillText(lab,120,y+28);
-      const v=val(k)||"—";
-      ctx.fillStyle=val(k)?ink:"#b3c0bd"; ctx.font=`500 34px ${FONT}`;
-      const lines=wrap(v,W-240).slice(0,2);
-      lines.forEach((ln,i)=>ctx.fillText(ln,120,y+76+i*44));
-      y+=76+lines.length*44+24;
+    // 各項目は枠（行数）を固定し、収まらなければ文字を小さくする
+    const rows=[
+      ["①","どこから来ましたか？","from",1,320],
+      ["②","今の業界 or 職種","now",2,446],
+      ["③","これから挑戦してみたいこと","next",3,618]
+    ];
+    rows.forEach(([no,lab,k,maxLines,y])=>{
+      ctx.fillStyle=C.teal; ctx.font=`700 30px ${DISP}`; ctx.fillText(no,72,y+30);
+      ctx.fillStyle=C.muted; ctx.font=`500 24px ${FONT}`; ctx.fillText(lab,120,y+28);
+      const v=val(k);
+      const r=fit(v||"—", textW, maxLines, 34, 24, 500, FONT);
+      ctx.fillStyle=v?C.ink:C.empty; ctx.font=`500 ${r.size}px ${FONT}`;
+      const lh=Math.round(r.size*1.35);
+      r.lines.forEach((ln,i)=>ctx.fillText(ln,120,y+74+i*lh));
     });
     $("cardImg").src=cv.toDataURL("image/png");
   }
 
+  function updateCount(k){
+    const el=document.querySelector(`.count[data-for="${k}"]`);
+    const n=[...$(k).value].length, max=$(k).maxLength;
+    el.textContent=`${n} / ${max}文字`;
+    el.classList.toggle("full", n>=max);
+  }
+
   let t;
-  function onInput(){
-    try{ const d={}; ids.forEach(k=>d[k]=$(k).value); localStorage.setItem("jiko-draft",JSON.stringify(d)); }catch(e){}
+  function onInput(e){
+    updateCount(e.target.id);
+    try{ const d={}; ids.forEach(k=>d[k]=$(k).value); localStorage.setItem("jiko-draft",JSON.stringify(d)); }catch(err){}
     clearTimeout(t); t=setTimeout(draw,120);
   }
-  ids.forEach(k=>$(k).addEventListener("input",onInput));
+  ids.forEach(k=>{ $(k).addEventListener("input",onInput); updateCount(k); });
   $("f").addEventListener("submit",e=>e.preventDefault());
 
   const fileBase = () => "自己紹介_" + (val("name")||"カード").replace(/[\\/:*?"<>|]/g,"");
@@ -167,37 +186,33 @@ button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
     doc.addImage(cv.toDataURL("image/png"),"PNG",0,0,W*0.75,H*0.75);
     return doc.output("blob");
   }
-
-  function textVersion(){
-    return `📝自己紹介\n・名前：${val("name")}\n①どこから来ましたか？：${val("from")}\n②今の業界 or 職種：${val("now")}\n③これから挑戦してみたいこと：${val("next")}`;
-  }
-
-  $("copyTxt").addEventListener("click",()=>{
-    const txt=textVersion();
-    const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); say("コピーしました。チャットに貼り付けてください。");}catch(e){say("コピーできませんでした。手動でコピーしてください。");} ta.remove(); };
-    try{ navigator.clipboard.writeText(txt).then(()=>say("コピーしました。チャットに貼り付けてください。"),fallback); }catch(e){ fallback(); }
-  });
-
   function saveBlob(blob, filename){
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     say("保存しました。ダウンロードフォルダ（スマホはファイルアプリ）を確認してください。");
   }
+  function textVersion(){
+    return `📝自己紹介\n・名前：${val("name")}\n①どこから来ましたか？：${val("from")}\n②今の業界 or 職種：${val("now")}\n③これから挑戦してみたいこと：${val("next")}`;
+  }
+
+  $("savePng").addEventListener("click",()=>{ draw(); cv.toBlob(b=>saveBlob(b,fileBase()+".png"),"image/png"); });
+  $("copyTxt").addEventListener("click",()=>{
+    const txt=textVersion();
+    const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); say("コピーしました。チャットに貼り付けてください。");}catch(e){say("コピーできませんでした。");} ta.remove(); };
+    try{ navigator.clipboard.writeText(txt).then(()=>say("コピーしました。チャットに貼り付けてください。"),fallback); }catch(e){ fallback(); }
+  });
+
+  draw();
   (async ()=>{
     try{ await document.fonts.load(`700 60px "Zen Maru Gothic"`); await document.fonts.load(`500 34px "Zen Kaku Gothic New"`); }catch(e){}
     draw();
-    $("savePng").hidden=false;
-    $("savePng").addEventListener("click",()=>cv.toBlob(b=>saveBlob(b,fileBase()+".png"),"image/png"));
     if(window.jspdf){
       $("savePdf").hidden=false;
-      $("savePdf").addEventListener("click",()=>{ try{ saveBlob(buildPdf(),fileBase()+".pdf"); }catch(e){ say("PDFを作れませんでした。画像で保存をお試しください。"); } });
+      $("savePdf").addEventListener("click",()=>{ draw(); try{ saveBlob(buildPdf(),fileBase()+".pdf"); }catch(e){ say("PDFを作れませんでした。画像で保存をお試しください。"); } });
     }
-    $("fallback").textContent="うまく保存できない場合は、カード画像を長押し（PCは右クリック）で保存できます。";
   })();
-  draw();
 })();
 </script>
-
 </body>
 </html>
