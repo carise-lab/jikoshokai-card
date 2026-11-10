@@ -37,6 +37,7 @@ input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;bo
 .preview h2{font-family:var(--display);font-size:1.1rem;margin:0}
 #cardImg{width:100%;border-radius:12px;border:1px solid var(--line);display:block;background:#fff}
 .actions{display:flex;flex-wrap:wrap;gap:10px}
+.tip{margin:0;padding:10px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent-deep);font-weight:700;font-size:.92rem}
 button{font:inherit;font-weight:700;border-radius:999px;padding:11px 20px;cursor:pointer;border:1px solid var(--accent)}
 .primary{background:var(--accent);color:#fff}
 .ghost{background:var(--surface);color:var(--accent-deep)}
@@ -69,17 +70,17 @@ button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
     <div class="field">
       <div class="labelrow"><label for="next"><span class="no">③</span>これから挑戦してみたいこと</label><span class="count" data-for="next"></span></div>
       <textarea id="next" maxlength="60" rows="3" placeholder="例：IT業界、手に職をつけたい など"></textarea>
-      <span class="hint">ざっくりでOK！「まだ考え中」も大歓迎です</span>
+      <span class="hint">ざっくりでOK！「まだ考え中」も大歓迎です（改行は2回まで）</span>
     </div>
   </form>
 
   <section class="preview" aria-label="カードのプレビュー">
     <h2>できあがりイメージ</h2>
     <img id="cardImg" alt="自己紹介カードのプレビュー">
+    <p class="tip">💡 リベチャットに貼るときは「画像で保存」が便利！</p>
     <div class="actions">
       <button type="button" class="primary" id="savePdf" hidden>PDFで保存</button>
       <button type="button" class="ghost" id="savePng">画像で保存</button>
-      <button type="button" class="ghost" id="copyTxt">テキストをコピー</button>
     </div>
     <p id="status" role="status"></p>
     <p class="note">うまく保存できない場合は、カード画像を長押し（PCは右クリック）で保存できます。</p>
@@ -97,16 +98,21 @@ button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
   const DISP = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif';
   const C = { bg:"#eef9fa", teal:"#13a6b8", deep:"#0b8597", soft:"#e0f5f7", ink:"#173a40", muted:"#5b7a80", empty:"#b6cfd3" };
 
-  try{ const d = JSON.parse(localStorage.getItem("jiko-draft")||"{}"); ids.forEach(k=>{ if(d[k]) $(k).value=d[k].slice(0,$(k).maxLength); }); }catch(e){}
+  // 毎回まっさらな状態で開く（以前の版で残った入力も消す）
+  try{ localStorage.removeItem("jiko-draft"); }catch(e){}
+  $("f").reset();
 
   const val = k => $(k).value.replace(/\n+/g," ").trim();
+  // ③だけ改行をそのまま使う（前後の空白行は除く）
+  const valKeepLines = k => $(k).value.replace(/^\s+|\s+$/g,"");
 
   function wrap(text, maxW){
     const lines=[]; let cur="";
     for(const ch of text){
+      if(ch==="\n"){ lines.push(cur); cur=""; continue; }
       if(ctx.measureText(cur+ch).width>maxW){ lines.push(cur); cur=ch; } else cur+=ch;
     }
-    if(cur) lines.push(cur);
+    lines.push(cur);
     return lines;
   }
   // 決められた行数に収まるまで文字を小さくする
@@ -147,12 +153,12 @@ button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
     const rows=[
       ["①","どこから来ましたか？","from",1,320],
       ["②","今の業界 or 職種","now",2,446],
-      ["③","これから挑戦してみたいこと","next",3,618]
+      ["③","これから挑戦してみたいこと","next",4,618]
     ];
     rows.forEach(([no,lab,k,maxLines,y])=>{
       ctx.fillStyle=C.teal; ctx.font=`700 30px ${DISP}`; ctx.fillText(no,72,y+30);
       ctx.fillStyle=C.muted; ctx.font=`500 24px ${FONT}`; ctx.fillText(lab,120,y+28);
-      const v=val(k);
+      const v=(k==="next")?valKeepLines(k):val(k);
       const r=fit(v||"—", textW, maxLines, 34, 24, 500, FONT);
       ctx.fillStyle=v?C.ink:C.empty; ctx.font=`500 ${r.size}px ${FONT}`;
       const lh=Math.round(r.size*1.35);
@@ -170,11 +176,16 @@ button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
 
   let t;
   function onInput(e){
+    if(e.target.id==="next"){
+      const parts=e.target.value.split("\n");
+      if(parts.length>3){ e.target.value=parts.slice(0,2).join("\n")+"\n"+parts.slice(2).join(""); }
+    }
     updateCount(e.target.id);
-    try{ const d={}; ids.forEach(k=>d[k]=$(k).value); localStorage.setItem("jiko-draft",JSON.stringify(d)); }catch(err){}
     clearTimeout(t); t=setTimeout(draw,120);
   }
   ids.forEach(k=>{ $(k).addEventListener("input",onInput); updateCount(k); });
+  // 「戻る」でページに戻ったときも入力を消す
+  window.addEventListener("pageshow",()=>{ $("f").reset(); ids.forEach(updateCount); say(""); draw(); });
   $("f").addEventListener("submit",e=>e.preventDefault());
 
   const fileBase = () => "自己紹介_" + (val("name")||"カード").replace(/[\\/:*?"<>|]/g,"");
@@ -192,17 +203,7 @@ button:focus-visible{outline:3px solid var(--accent-deep);outline-offset:2px}
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     say("保存しました。ダウンロードフォルダ（スマホはファイルアプリ）を確認してください。");
   }
-  function textVersion(){
-    return `📝自己紹介\n・名前：${val("name")}\n①どこから来ましたか？：${val("from")}\n②今の業界 or 職種：${val("now")}\n③これから挑戦してみたいこと：${val("next")}`;
-  }
-
   $("savePng").addEventListener("click",()=>{ draw(); cv.toBlob(b=>saveBlob(b,fileBase()+".png"),"image/png"); });
-  $("copyTxt").addEventListener("click",()=>{
-    const txt=textVersion();
-    const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); say("コピーしました。チャットに貼り付けてください。");}catch(e){say("コピーできませんでした。");} ta.remove(); };
-    try{ navigator.clipboard.writeText(txt).then(()=>say("コピーしました。チャットに貼り付けてください。"),fallback); }catch(e){ fallback(); }
-  });
-
   draw();
   (async ()=>{
     try{ await document.fonts.load(`700 60px "Zen Maru Gothic"`); await document.fonts.load(`500 34px "Zen Kaku Gothic New"`); }catch(e){}
