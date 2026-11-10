@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>オフ会 自己紹介カード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: 1カラム。上に入力フォーム、下にカードのプレビューと保存ボタン */
+:root{
+  --bg:#f3f6f5; --surface:#ffffff; --ink:#1f2e2c; --muted:#5d6e6b;
+  --line:#d5e0dd; --accent:#1f7a6d; --accent-soft:#e2f1ee; --warm:#e8a33d;
+  --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141c1b; --surface:#1c2725; --ink:#e7efed; --muted:#9db0ac;
+  --line:#2f3f3c; --accent:#5cc2b2; --accent-soft:#1f3532; --warm:#f0b75a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141c1b; --surface:#1c2725; --ink:#e7efed; --muted:#9db0ac;
+  --line:#2f3f3c; --accent:#5cc2b2; --accent-soft:#1f3532; --warm:#f0b75a; color-scheme:dark}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7}
+.wrap{max-width:640px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-size:1.6rem;margin:0;text-wrap:balance;line-height:1.35}
+.lead{margin:6px 0 0;color:var(--muted)}
+form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+label .no{display:inline-block;min-width:1.6em;color:var(--accent);font-family:var(--display)}
+.hint{font-size:.82rem;color:var(--muted)}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+textarea{resize:vertical;min-height:3.2em}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.preview{display:flex;flex-direction:column;gap:12px}
+.preview h2{font-family:var(--display);font-size:1.1rem;margin:0}
+#cardImg{width:100%;border-radius:12px;border:1px solid var(--line);display:block;background:#fff}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+button{font:inherit;font-weight:700;border-radius:999px;padding:11px 20px;cursor:pointer;border:1px solid var(--accent)}
+.primary{background:var(--accent);color:var(--surface)}
+.ghost{background:transparent;color:var(--accent)}
+button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+#status{font-size:.88rem;color:var(--muted);min-height:1.4em;margin:0}
+.note{font-size:.82rem;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>📝 自己紹介カード</h1>
+    <p class="lead">入力すると下にカードができあがります。PDFや画像で保存して、チャットに貼ってくださいね。</p>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <div class="field">
+      <label for="name"><span class="no">・</span>お名前（ニックネーム）</label>
+      <input id="name" maxlength="30" placeholder="例：なのか">
+    </div>
+    <div class="field">
+      <label for="from"><span class="no">①</span>どこから来ましたか？</label>
+      <input id="from" maxlength="40" placeholder="例：千葉市">
+    </div>
+    <div class="field">
+      <label for="now"><span class="no">②</span>今の業界 or 職種</label>
+      <input id="now" maxlength="60" placeholder="例：不動産業界／営業職 など">
+    </div>
+    <div class="field">
+      <label for="next"><span class="no">③</span>これから挑戦してみたいこと</label>
+      <textarea id="next" maxlength="90" rows="2" placeholder="例：IT業界、手に職をつけたい など"></textarea>
+      <span class="hint">ざっくりでOK！「まだ考え中」も大歓迎です</span>
+    </div>
+  </form>
+
+  <section class="preview" aria-label="カードのプレビュー">
+    <h2>できあがりイメージ</h2>
+    <img id="cardImg" alt="自己紹介カードのプレビュー">
+    <div class="actions">
+      <button type="button" class="primary" id="savePdf" hidden>PDFで保存</button>
+      <button type="button" class="ghost" id="savePng" hidden>画像で保存</button>
+      <button type="button" class="ghost" id="copyTxt">テキストをコピー</button>
+    </div>
+    <p id="status" role="status"></p>
+    <p class="note" id="fallback">保存ボタンが出ない場合は、カード画像を長押し（PCは右クリック）で保存できます。</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const ids = ["name","from","now","next"];
+  const W = 1200, H = 760;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d");
+  const FONT = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Meiryo",sans-serif';
+  const DISP = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif';
+
+  // 入力途中の内容だけ、この端末に残す
+  try{ const d = JSON.parse(localStorage.getItem("jiko-draft")||"{}"); ids.forEach(k=>{ if(d[k]) $(k).value=d[k]; }); }catch(e){}
+
+  const val = k => $(k).value.trim();
+
+  function wrap(text, maxW){
+    const lines=[]; let cur="";
+    for(const ch of text){
+      if(ch==="\n"){ lines.push(cur); cur=""; continue; }
+      if(ctx.measureText(cur+ch).width>maxW){ lines.push(cur); cur=ch; } else cur+=ch;
+    }
+    if(cur) lines.push(cur);
+    return lines;
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function draw(){
+    const teal="#1f7a6d", ink="#1f2e2c", muted="#5d6e6b", soft="#e2f1ee", warm="#e8a33d";
+    ctx.fillStyle="#f3f6f5"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#ffffff"; roundRect(30,30,W-60,H-60,28); ctx.fill();
+    // 上の帯
+    ctx.save(); roundRect(30,30,W-60,H-60,28); ctx.clip();
+    ctx.fillStyle=teal; ctx.fillRect(30,30,W-60,96); ctx.restore();
+    ctx.fillStyle="#ffffff"; ctx.font=`700 34px ${DISP}`; ctx.textBaseline="middle";
+    ctx.fillText("自己紹介カード",72,78);
+    ctx.fillStyle=warm; ctx.beginPath(); ctx.arc(W-90,78,14,0,Math.PI*2); ctx.fill();
+
+    // 名前
+    ctx.textBaseline="alphabetic";
+    ctx.fillStyle=muted; ctx.font=`500 24px ${FONT}`; ctx.fillText("お名前",72,186);
+    const nm = val("name")||"（お名前）";
+    ctx.fillStyle=val("name")?ink:"#b3c0bd"; ctx.font=`700 60px ${DISP}`;
+    let n=nm; while(ctx.measureText(n).width>W-150 && n.length>1) n=n.slice(0,-1);
+    ctx.fillText(n,72,256);
+    ctx.fillStyle=soft; ctx.fillRect(72,282,W-144,4);
+
+    const rows=[["①","どこから来ましたか？","from"],["②","今の業界 or 職種","now"],["③","これから挑戦してみたいこと","next"]];
+    let y=330;
+    rows.forEach(([no,lab,k])=>{
+      ctx.fillStyle=teal; ctx.font=`700 30px ${DISP}`; ctx.fillText(no,72,y+30);
+      ctx.fillStyle=muted; ctx.font=`500 24px ${FONT}`; ctx.fillText(lab,120,y+28);
+      const v=val(k)||"—";
+      ctx.fillStyle=val(k)?ink:"#b3c0bd"; ctx.font=`500 34px ${FONT}`;
+      const lines=wrap(v,W-240).slice(0,2);
+      lines.forEach((ln,i)=>ctx.fillText(ln,120,y+76+i*44));
+      y+=76+lines.length*44+24;
+    });
+    $("cardImg").src=cv.toDataURL("image/png");
+  }
+
+  let t;
+  function onInput(){
+    try{ const d={}; ids.forEach(k=>d[k]=$(k).value); localStorage.setItem("jiko-draft",JSON.stringify(d)); }catch(e){}
+    clearTimeout(t); t=setTimeout(draw,120);
+  }
+  ids.forEach(k=>$(k).addEventListener("input",onInput));
+  $("f").addEventListener("submit",e=>e.preventDefault());
+
+  const fileBase = () => "自己紹介_" + (val("name")||"カード").replace(/[\\/:*?"<>|]/g,"");
+  const say = m => { $("status").textContent=m; };
+
+  function buildPdf(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:"landscape",unit:"pt",format:[W*0.75,H*0.75]});
+    doc.addImage(cv.toDataURL("image/png"),"PNG",0,0,W*0.75,H*0.75);
+    return doc.output("blob");
+  }
+
+  function textVersion(){
+    return `📝自己紹介\n・名前：${val("name")}\n①どこから来ましたか？：${val("from")}\n②今の業界 or 職種：${val("now")}\n③これから挑戦してみたいこと：${val("next")}`;
+  }
+
+  $("copyTxt").addEventListener("click",()=>{
+    const txt=textVersion();
+    const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); say("コピーしました。チャットに貼り付けてください。");}catch(e){say("コピーできませんでした。手動でコピーしてください。");} ta.remove(); };
+    try{ navigator.clipboard.writeText(txt).then(()=>say("コピーしました。チャットに貼り付けてください。"),fallback); }catch(e){ fallback(); }
+  });
+
+  function saveBlob(blob, filename){
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    say("保存しました。ダウンロードフォルダ（スマホはファイルアプリ）を確認してください。");
+  }
+  (async ()=>{
+    try{ await document.fonts.load(`700 60px "Zen Maru Gothic"`); await document.fonts.load(`500 34px "Zen Kaku Gothic New"`); }catch(e){}
+    draw();
+    $("savePng").hidden=false;
+    $("savePng").addEventListener("click",()=>cv.toBlob(b=>saveBlob(b,fileBase()+".png"),"image/png"));
+    if(window.jspdf){
+      $("savePdf").hidden=false;
+      $("savePdf").addEventListener("click",()=>{ try{ saveBlob(buildPdf(),fileBase()+".pdf"); }catch(e){ say("PDFを作れませんでした。画像で保存をお試しください。"); } });
+    }
+    $("fallback").textContent="うまく保存できない場合は、カード画像を長押し（PCは右クリック）で保存できます。";
+  })();
+  draw();
+})();
+</script>
+
+</body>
+</html>
